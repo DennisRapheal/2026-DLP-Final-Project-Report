@@ -162,8 +162,9 @@
 
 			\begin{alertblock}{Why Did A2C2 Hurt Performance?}
 				
-				After adding A2C2, Task 18 performance dropped far below the frozen
-				OpenPI-Comet baseline. Our diagnosis is that the current objective treats
+				Even though the validation corrected MSE is roughly half of the base action MSE, 
+				the evaluation performance still dropped significantly.
+				Our diagnosis is that the current objective treats
 				a heterogeneous, bounded robot action vector as a homogeneous residual
 				regression problem:
 				$$
@@ -214,30 +215,13 @@
 		
 		\begin{column}{\colwidth}
 			
-			\begin{block}{Training and Online Evaluation}
-				
-				The residual head is trained with AdamW using learning rate $10^{-5}$,
-				weight decay $10^{-5}$, gradient clipping at 10, validation split 0.05,
-				and a 400,000-step training budget. Offline validation reports residual
-				MSE/MAE, corrected-action MSE, and base-action MSE.
-				
-				Online evaluation uses a receding-horizon wrapper. At each source frame,
-				OpenPI-Comet predicts a 32-step chunk and caches the COMET prefix latent.
-				At every execution step, A2C2 reads the latest RGB/proprioceptive state,
-				selects the current base action, predicts a residual, and returns:
-				$$
-				\text{selected\_base\_action} + \text{correction\_scale} \cdot \text{residual}.
-				$$
-				
-			\end{block}
-			
 			\begin{exampleblock}{Results}{}
 
 				We evaluate Task 1 (Picking Up Trash) with fixed-seed online rollouts over
 				ten instances.  The ablation compares the frozen OpenPI-Comet baseline
 				against A2C2 residual-correction variants trained for 200k steps:
 				(i) raw MSE, (ii) normalized MSE, (iii) normalized Huber (iv) the full setting with
-				normalization, Huber loss, and gripper weighting
+				normalization, Huber loss, and gripper weighting. All the validation corrected mse are smaller than base action mse. 
 		
 				\begin{table}
 						\centering
