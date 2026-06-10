@@ -7,29 +7,24 @@
 	citestyle=authoryear,
 	style=authoryear,
 	maxcitenames=2,
-	maxbibnames=20, % limit the length of list of names (authors/editors/etc.)
+	maxbibnames=4, % keep poster references compact and readable
+	minbibnames=3,
 	sorting=ydnt, % sort references by year (descending), name, title
 	dashed=false, % show authors instead of dash in publications having the same authors
 	giveninits=true % render authors' given name initials and not the full given names
 ]{biblatex}
-%% Biblatex with Beamer bibliography icons
-\setbeamertemplate{bibliography item}{%
-	\ifboolexpr{ test {\ifentrytype{book}} or test {\ifentrytype{mvbook}}
-		or test {\ifentrytype{collection}} or test {\ifentrytype{mvcollection}}
-		or test {\ifentrytype{reference}} or test {\ifentrytype{mvreference}} }
-	{\setbeamertemplate{bibliography item}[book]}
-	{\ifentrytype{online}
-		{\setbeamertemplate{bibliography item}[online]}
-		{\setbeamertemplate{bibliography item}[article]}}%
-	\usebeamertemplate{bibliography item}}
+%% Compact bibliography marker for poster-scale references
+\setbeamertemplate{bibliography item}{\raisebox{0.25ex}{\scriptsize\textbullet}}
 \defbibenvironment{bibliography}
 {\list{}
 	{\settowidth{\labelwidth}{\usebeamertemplate{bibliography item}}%
 		\setlength{\leftmargin}{\labelwidth}%
-		\setlength{\labelsep}{\biblabelsep}%
+		\setlength{\labelsep}{0.6em}%
 		\addtolength{\leftmargin}{\labelsep}%
-		\setlength{\itemsep}{\bibitemsep}%
-		\setlength{\parsep}{\bibparsep}}}
+		\setlength{\itemsep}{0.55em}%
+		\setlength{\parsep}{0.15em}%
+		\setlength{\topsep}{0pt}%
+		\setlength{\partopsep}{0pt}}}
 {\endlist}
 {\item}
 %% Redefine \refname
@@ -120,7 +115,7 @@
 	colframe=brown!75!black,colback=brown!5!white,coltitle=brown!50!brown!75!black,
 %	left=0mm,right=0mm,top=2mm,bottom=0mm,
 	title={#1},
-	fonttitle=\bfseries\large, fontupper=\color{brown!65!white},
+	fonttitle=\bfseries\large, fontupper=\color{brown!65!black},
 	boxed title style={colback=brown!5!white,coltitle=brown!50!brown!75!black},
 	before upper={
 		\beamercolorsinboxes{brown}
