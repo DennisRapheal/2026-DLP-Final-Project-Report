@@ -90,21 +90,16 @@
 	\begin{column}{2\colwidth+\sepwidth}
 	\begin{block}{Project Overview}
 		
-		This project studies residual action correction for a frozen OpenPI-Comet
-		Vision-Language-Action (VLA) policy on BEHAVIOR-1K. OpenPI-Comet predicts
-		32-step continuous action chunks for long-horizon household manipulation.
-		Instead of retraining the full VLA model, we train an Asynchronous Action
-		Chunk Correction (A2C2) head that predicts a 23-dimensional residual for the
-		selected base action at execution time.
+		We study whether an Asynchronous Action Chunk Correction (A2C2) module can
+		improve a frozen OpenPI-Comet VLA policy on BEHAVIOR-1K without retraining
+		the base model.
 		
-		\blankfigure{20}{3.4}{To be edited.}
-		
-		The target task is Task 18, \textit{Tidying Bedroom}. It is selected because
-		the OpenPI-Comet validation ACC prior shows non-saturated baseline competence:
-		Task 1 is already saturated, while Task 18 is the next assigned task with
-		non-zero reported capability. This gives the correction module measurable
-		headroom while avoiding tasks where the base policy appears to have no initial
-		competence.
+		OpenPI-Comet predicts 32-step action chunks. At execution offset $k$, A2C2
+		uses the latest observation to predict a 23-D residual:
+		$$
+		a^{exec}_{t+k} = a^b_{t,k} + \lambda \Delta a_{t,k}.
+		$$
+
 		
 	\end{block}
 	\end{column}
@@ -116,63 +111,30 @@
 		
 		\begin{column}{\colwidth}
 			
-			\begin{thm}{Research Question}{}
+			\begin{exampleblock}{Task Selection}
 				
-				Can a small online residual head improve a frozen action-chunking VLA policy
-				without retraining the base model?
-				
-				For source frame $t$, OpenPI-Comet predicts a base action chunk
-				$A^b_t = \{a^b_{t,0}, \ldots, a^b_{t,H-1}\}$ with horizon $H=32$ and
-				action dimension $d_a=23$. For execution offset $k$, A2C2 predicts:
-				$$
-				a^{exec}_{t+k} = a^b_{t,k} + \lambda \Delta a_{t,k}.
-				$$
-				
-				The core hypothesis is that the latest execution observation can correct
-				stale or locally invalid actions inside a long action chunk while preserving
-				the base policy's high-level intent.
-				
-			\end{thm}
-			
-			\begin{alertblock}{Task Selection}
-				
-				We filter tasks based on their validation ACC prior. Task 18 is chosen as the
-				main target because it balances base-policy competence and remaining
-				improvement potential.
+				We first reproduced OpenPI-Comet fixed-seed rollouts and used the local
+				$q_{final}$ statistics to select representative tasks for setup validation.
+				Task 18 is kept as the main correction target because it shows partial but
+				non-saturated baseline progress.
 				
 				\begin{table}
 					\centering
-					\begin{tabular}{l l r c}
+					\begin{tabular}{l l c c c c c c}
 						\toprule
-						\textbf{ID} & \textbf{Task} & \textbf{ACC Prior} & \textbf{Avg Frames} \\
+						\textbf{ID} & \textbf{Task} & \textbf{Mean} & \textbf{Median} &
+						\textbf{Min} & \textbf{Max} & \textbf{$>0$} & \textbf{Avg Frames} \\
 						\midrule
-						1 & Picking Up Trash & 100\% & 5268 \\
-						7 & Picking Up Toys & 0\% & 18891 \\
-						18 & Tidying Bedroom & 20\% & 11037 \\
+						1 & Picking Up Trash & 0.8333 & 1.0000 & 0.3333 & 1.0000 & 100\% & 5268 \\
+						7 & Picking Up Toys & 0.1833 & 0.0833 & 0.0000 & 0.6667 & 50\% & 18891 \\
+						18 & Tidying Bedroom & 0.1333 & 0.0000 & 0.0000 & 0.6667 & 30\% & 11037 \\
 						\bottomrule
 					\end{tabular}
-					\caption{OpenPI-Comet validation ACC prior used only for task selection.}
+					\caption{Local OpenPI-Comet fixed-seed rollout statistics for selected tasks.}
 				\end{table}
 				
-			\end{alertblock}
-			
-			\begin{defbox}{Training Signal}{}
-				
-				Each training example aligns a source-frame base chunk with a target-frame
-				expert demonstration action. The residual target is:
-				$$
-				\Delta a^*_{t,k} = a^*_{t+k} - a^b_{t,k}.
-				$$
-				
-				The correction head is trained with residual mean-squared error:
-				$$
-				L(\theta) = \frac{1}{N}\sum_i \|g_\theta(x_i)-\Delta a^*_i\|_2^2.
-				$$
-				
-				Valid-entry masks remove chunk offsets that cross episode boundaries. The
-				base policy remains frozen throughout training and online evaluation.
-				
-			\end{defbox}
+			\end{exampleblock}
+	
 			
 			\begin{block}{Correction Head Inputs}
 				
@@ -195,6 +157,54 @@
 				\end{figure}
 				
 			\end{block}
+
+			\begin{alertblock}{Why Did A2C2 Hurt Performance?}
+				
+				After adding A2C2, Task 18 performance dropped far below the frozen
+				OpenPI-Comet baseline. Our diagnosis is that the current objective treats
+				a heterogeneous, bounded robot action vector as a homogeneous residual
+				regression problem:
+				$$
+				L = \|\Delta a_{pred} - (a_{expert} - a^b_{t,k})\|_2^2.
+				$$
+				
+				\begin{itemize}
+					\item \textbf{Scale mismatch:} arm/torso dimensions can dominate the loss,
+					while small-range gripper errors remain weakly supervised.
+					\item \textbf{Behavior mismatch:} gripper commands are event-like; MSE can
+					average open/close actions into invalid half-open behavior.
+					\item \textbf{Policy mismatch:} a large residual can perturb a coherent
+					action chunk generated by the frozen flow policy.
+				\end{itemize}
+				
+			\end{alertblock}
+
+			\begin{defbox}{Range-Normalized Residual Loss}
+
+				We keep the residual target unchanged:
+				$$
+				\Delta a^*_{t,k} = a^*_{t+k} - a^b_{t,k}.
+				$$
+				For each action dimension $j$, we estimate a robust scale from the training
+				split and normalize residual errors:
+				$$
+				s_j = \max\left(Q_{0.99}(a_j)-Q_{0.01}(a_j), \epsilon\right),
+				\quad
+				e_j = \frac{\hat{\Delta a}_j - \Delta a^*_j}{s_j}.
+				$$
+				Then we aggregate errors by action group:
+				$$
+				L_{\text{group}} =
+				\sum_{g \in \mathcal{G}} w_g
+				\frac{1}{|g|}\sum_{j \in g} \rho(e_j),
+				$$
+				where $\mathcal{G}$ contains base, torso, left/right arm, and left/right
+				gripper groups. We compare normalized MSE, normalized Huber, and a
+				gripper-weighted Huber variant with $w_g=2.0$ for grippers and $w_g=1.0$
+				otherwise. This directly tests whether the failure comes from scale
+				imbalance, outlier residuals, or weak gripper supervision.
+
+			\end{defbox}
 			
 		\end{column}
 	
