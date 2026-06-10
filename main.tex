@@ -146,7 +146,7 @@
 				\begin{itemize}
 					\item \textbf{Source-frame context:} cached action chunk, selected action,
 					valid mask, OpenPI-Comet prefix latent $z_t$, and inference timing.
-					\item \textbf{Execution-frame context:} proprioception, RGB-D observations,
+					\item \textbf{Execution-frame context:} proprioception, RGB observations,
 					task language, camera-relative pose, and task-info features.
 					\item \textbf{Model structure:} token projections, language GRU, frozen
 					ResNet-18 visual encoders, six-layer Transformer encoder, and residual MLP.
@@ -223,7 +223,7 @@
 				
 				Online evaluation uses a receding-horizon wrapper. At each source frame,
 				OpenPI-Comet predicts a 32-step chunk and caches the COMET prefix latent.
-				At every execution step, A2C2 reads the latest RGB-D/proprioceptive state,
+				At every execution step, A2C2 reads the latest RGB/proprioceptive state,
 				selects the current base action, predicts a residual, and returns:
 				$$
 				\text{selected\_base\_action} + \text{correction\_scale} \cdot \text{residual}.
@@ -292,7 +292,7 @@
 				
 				The result is negative but informative. The implementation matches the A2C2
 				formulation: it keeps OpenPI-Comet frozen, trains expert-minus-base
-				residuals, uses latest execution-frame RGB-D/proprioception/language, and
+				residuals, uses latest execution-frame RGB/proprioception/language, and
 				deploys the head inside an online receding-horizon control loop.
 				
 				\begin{itemize}
