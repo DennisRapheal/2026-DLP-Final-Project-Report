@@ -1,0 +1,321 @@
+\documentclass[final]{beamer}
+%% Possible paper sizes: a0, a0b, a1, a2, a3, a4.
+%% Possible orientations: portrait, landscape
+%% Font sizes can be changed using the scale option.
+\usepackage[size=a0,orientation=portrait,scale=1.1]{beamerposter}
+
+\usetheme{gemini}
+\usecolortheme{seagull}
+\useinnertheme{rectangles}
+
+% ====================
+% Packages
+% ====================
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+% ====================
+% Lengths
+% ====================
+
+% If you have N columns, choose \sepwidth and \colwidth such that
+% (N+1)*\sepwidth + N*\colwidth = \paperwidth
+\newlength{\sepwidth}
+\newlength{\colwidth}
+\setlength{\sepwidth}{0.03\paperwidth}
+\setlength{\colwidth}{0.45\paperwidth}
+
+\newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
+\newcommand{\blankfigure}[2]{
+	\begin{figure}
+		\centering
+		\begin{tikzpicture}
+			\draw[gray, line width=1.2pt] (0,0) rectangle (#1,#2);
+		\end{tikzpicture}
+		\caption{Figure placeholder.}
+	\end{figure}
+}
+
+% ====================
+% Logo (optional)
+% ====================
+
+\logoleft{
+	\hspace{5cm}\includegraphics[height=10 cm]{logos/nycu.png}
+}
+\logoright{
+	\includegraphics[height=10 cm]{logos/nycu.png}\hspace{5cm}
+}
+
+% ====================
+% Footer (optional)
+% ====================
+
+\footercontent{
+	2026 Deep Learning Final Project Presentation \hfill
+	\insertdate \hfill
+	BEHAVIOR-1K VLA Action Chunk Correction
+}
+
+% ====================
+% My own customization
+% - BibLaTeX
+% - Boxes with tcolorbox
+% - User-defined commands
+% ====================
+\input{custom-defs.tex}
+
+%% Reference Sources
+\addbibresource{refs.bib}
+\renewcommand{\pgfuseimage}[1]{\includegraphics[scale=2.0]{#1}}
+
+\title{Residual Action Chunk Correction for OpenPI-Comet on BEHAVIOR-1K}
+
+\author{LIN, JIN-CHENG \and LIN, TING-WEI \and CHU, YI-TING}
+
+\institute[shortinst]{Deep Learning Final Project}
+
+\date{June 2026}
+
+\begin{document}
+	
+\begin{frame}[t]
+	
+	\begin{columns}[t]
+	
+	\begin{column}{2\colwidth+\sepwidth}
+	\begin{block}{Project Overview}
+		
+		This project studies residual action correction for a frozen OpenPI-Comet
+		Vision-Language-Action (VLA) policy on BEHAVIOR-1K. OpenPI-Comet predicts
+		32-step continuous action chunks for long-horizon household manipulation.
+		Instead of retraining the full VLA model, we train an Asynchronous Action
+		Chunk Correction (A2C2) head that predicts a 23-dimensional residual for the
+		selected base action at execution time.
+		
+		\blankfigure{20}{3.4}
+		
+		The target task is Task 18, \textit{Tidying Bedroom}. It is selected because
+		the OpenPI-Comet validation ACC prior shows non-saturated baseline competence:
+		Task 1 is already saturated, while Task 18 is the next assigned task with
+		non-zero reported capability. This gives the correction module measurable
+		headroom while avoiding tasks where the base policy appears to have no initial
+		competence.
+		
+	\end{block}
+	\end{column}
+
+	\end{columns}
+
+	\begin{columns}[t]
+		\separatorcolumn
+		
+		\begin{column}{\colwidth}
+			
+			\begin{thm}{Research Question hahaha  666 }{}
+				
+				Can a small online residual head improve a frozen action-chunking VLA policy
+				without retraining the base model?
+				
+				For source frame $t$, OpenPI-Comet predicts a base action chunk
+				$A^b_t = \{a^b_{t,0}, \ldots, a^b_{t,H-1}\}$ with horizon $H=32$ and
+				action dimension $d_a=23$. For execution offset $k$, A2C2 predicts:
+				$$
+				a^{exec}_{t+k} = a^b_{t,k} + \lambda \Delta a_{t,k}.
+				$$
+				
+				The core hypothesis is that the latest execution observation can correct
+				stale or locally invalid actions inside a long action chunk while preserving
+				the base policy's high-level intent.
+				
+			\end{thm}
+			
+			\begin{alertblock}{Task Selection}
+				
+				The assigned tasks are 1, 7, 18, 21, 27, and 29. Task 18 is chosen as the
+				main target because it balances base-policy competence and remaining
+				improvement potential.
+				
+				\begin{table}
+					\centering
+					\begin{tabular}{l l r}
+						\toprule
+						\textbf{ID} & \textbf{Task} & \textbf{ACC Prior} \\
+						\midrule
+						1 & Picking Up Trash & 100\% \\
+						7 & Picking Up Toys & 0\% \\
+						18 & Tidying Bedroom & 20\% \\
+						\bottomrule
+					\end{tabular}
+					\caption{OpenPI-Comet validation ACC prior used only for task selection.}
+				\end{table}
+				
+			\end{alertblock}
+			
+			\begin{defbox}{Training Signal}{}
+				
+				Each training example aligns a source-frame base chunk with a target-frame
+				expert demonstration action. The residual target is:
+				$$
+				\Delta a^*_{t,k} = a^*_{t+k} - a^b_{t,k}.
+				$$
+				
+				The correction head is trained with residual mean-squared error:
+				$$
+				L(\theta) = \frac{1}{N}\sum_i \|g_\theta(x_i)-\Delta a^*_i\|_2^2.
+				$$
+				
+				Valid-entry masks remove chunk offsets that cross episode boundaries. The
+				base policy remains frozen throughout training and online evaluation.
+				
+			\end{defbox}
+			
+			\begin{block}{Correction Head Inputs}
+				
+				The implemented A2C2 head is a multimodal token-fusion model rather than a
+				state-only MLP.
+				
+				\begin{itemize}
+					\item \textbf{Source-frame context:} cached action chunk, selected action,
+					valid mask, OpenPI-Comet prefix latent $z_t$, and inference timing.
+					\item \textbf{Execution-frame context:} proprioception, RGB-D observations,
+					task language, camera-relative pose, and task-info features.
+					\item \textbf{Model structure:} token projections, language GRU, frozen
+					ResNet-18 visual encoders, six-layer Transformer encoder, and residual MLP.
+				\end{itemize}
+				
+				\blankfigure{13}{3}
+				
+			\end{block}
+			
+		\end{column}
+	
+		\separatorcolumn
+		
+		\begin{column}{\colwidth}
+			
+			\begin{block}{Training and Online Evaluation}
+				
+				The residual head is trained with AdamW using learning rate $10^{-5}$,
+				weight decay $10^{-5}$, gradient clipping at 10, validation split 0.05,
+				and a 400,000-step training budget. Offline validation reports residual
+				MSE/MAE, corrected-action MSE, and base-action MSE.
+				
+				Online evaluation uses a receding-horizon wrapper. At each source frame,
+				OpenPI-Comet predicts a 32-step chunk and caches the COMET prefix latent.
+				At every execution step, A2C2 reads the latest RGB-D/proprioceptive state,
+				selects the current base action, predicts a residual, and returns:
+				$$
+				\text{selected\_base\_action} + \text{correction\_scale} \cdot \text{residual}.
+				$$
+				
+			\end{block}
+			
+			\begin{exampleblock}{Results}{}
+				
+				Fixed-seed OpenPI-Comet baseline rollouts over ten instances show that Task
+				18 has partial but limited progress, making it a meaningful correction target.
+				
+				\begin{table}
+					\centering
+					\begin{tabular}{l r r c}
+						\toprule
+						\textbf{ID} & \textbf{Task} & \textbf{Mean $q_{final}$} & \textbf{SD} \\
+						\midrule
+						1 & Picking Up Trash & 0.8333 & 0.2236 \\
+						7 & Picking Up Toys & 0.1833 & 0.2291 \\
+						18 & Tidying Bedroom & 0.1333 & 0.2211 \\
+						21 & Children's Toys & 0.4667 & 0.2332 \\
+						27 & Sorting Items & 0.1250 & 0.1768 \\
+						29 & Clean Up Desk & 0.0909 & 0.0707 \\
+						\bottomrule
+					\end{tabular}
+					\caption{Local fixed-seed baseline results over ten instances per assigned task.}
+				\end{table}
+				
+				For Task 18 online comparison, the corrected policy performs worse than the
+				frozen baseline:
+				$$
+				\text{mean } q_{final}: \quad 0.1333 \rightarrow 0.0000.
+				$$
+				The baseline achieves nonzero progress on 3/10 IDs; A2C2 achieves 0/10.
+				
+			\end{exampleblock}
+
+			\begin{thm}{Potential Risk: Random Chunk Supervision Can Break Mode Consistency}{}
+				
+				The base flow policy samples a temporally coherent action chunk:
+				$$
+				A^b_t \sim \pi_b(A_t \mid o_t, \ell).
+				$$
+				However, A2C2 is trained with randomly sampled chunk offsets. For an offset
+				$k$, the residual target is defined locally as
+				$$
+				\Delta a^{target}_{t,k}
+				=
+				a^{expert}_{t+k} - a^b_{t,k}.
+				$$
+
+				This provides only local one-step supervision. If multiple valid chunks exist
+				under similar observations, the sampled expert action may belong to a different
+				mode from the base action chunk. Then the residual head is trained to partially
+				pull a coherent base chunk toward a locally different expert mode:
+				$$
+				a^b_{t,k} + \Delta a_\phi
+				\approx
+				a^{expert}_{t+k}.
+				$$
+
+				As a result, the correction may not collapse an entire trajectory, but it can
+				break chunk-level mode consistency. The corrected action sequence may mix
+				parts of different modes, reducing the temporal coherence originally produced
+				by the flow-based base policy.
+				
+			\end{thm}
+			
+			\begin{block}{Discussion}
+				
+				The result is negative but informative. The implementation matches the A2C2
+				formulation: it keeps OpenPI-Comet frozen, trains expert-minus-base
+				residuals, uses latest execution-frame RGB-D/proprioception/language, and
+				deploys the head inside an online receding-horizon control loop.
+				
+				\begin{itemize}
+					\item \textbf{Offline-online mismatch:} training states come from expert
+					demonstrations, but online rollouts visit policy-induced states with missed
+					grasps, contact errors, and shifted object poses.
+					\item \textbf{Action-scale imbalance:} raw MSE may be dominated by large arm
+					coordinates while small gripper/contact dimensions remain task-critical.
+					\item \textbf{Overcorrection:} an unconservative residual can perturb a base
+					policy that was already partially competent.
+				\end{itemize}
+				
+				\blankfigure{13}{3}
+				
+			\end{block}
+			
+			\begin{block}{Conclusion and Next Steps}
+				A2C2 does not improve Task 18 under the current configuration, reducing mean
+				$q_{final}$ from 0.1333 to 0.0000. The next iteration should focus on making
+				the residual module more conservative and better matched to online states.
+				
+				\begin{itemize}
+					\item Normalize or reweight the loss by action dimension.
+					\item Ablate correction scales such as 0.25, 0.5, and 1.0.
+					\item Add residual norm clipping and an uncertainty gate that can keep the
+					base action unchanged.
+					\item Analyze performance by chunk offset to separate stale-chunk errors from
+					missing high-level capability.
+					\item Add online data, rollout-state relabeling, or hard-negative states.
+				\end{itemize}
+			\end{block}
+		\end{column}
+		
+		\separatorcolumn
+	\end{columns}
+\end{frame}
+\end{document}

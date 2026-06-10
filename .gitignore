@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+
+# Beamer / hyperref / bibliography intermediates
+*.brf
+*.idx
+*.ilg
+*.ind
+*.lof
+*.lot
+*.synctex
+
+# Generated output
+*.pdf
