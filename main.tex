@@ -240,9 +240,9 @@
 								\textbf{ID} & \textbf{Policy} & \textbf{Ablation} & \textbf{Mean $q_{final}$} & \textbf{SD} & \textbf{Nonzero IDs} \\
 								\midrule
 								-- & Comet & Frozen baseline & 0.8333 & 0.2236 & 10/10 \\
-								(a) & Comet + A2C2 & MSE &  &  &  \\
+								(a) & Comet + A2C2 & MSE & 0.0000 & x & 0/10 \\
 								(b) & Comet + A2C2 & Norm-MSE & 0.2333 & 0.2134 & 6/10 \\
-								(c) & Comet + A2C2 & Norm-Huber &  &  &  \\
+								(c) & Comet + A2C2 & Norm-Huber & 0.0000 & x & 0/10 \\
 								(d) & Comet + A2C2 & Norm+Huber+GripW & 0.1000 & 0.2134 & 2/10 \\
 								\bottomrule
 						\end{tabular}
@@ -310,9 +310,9 @@
 						\textbf{Grip Delay} $\downarrow$ &
 						\textbf{Jerk} $\downarrow$ \\
 						\midrule
-						(a) &  &  &  &  &  \\
+						(a) & 0.383 & 9.189 & 0.000 & 178.875 & 0.269 \\
 						(b) & 0.335 & 2.329 & 0.703 & 482.033 & 0.160 \\
-						(c) &  &  &  &  &  \\
+						(c) & 0.115 & 1.695 & 0.268 & 615.282 & 0.174 \\
 						(d) & 0.113 & 2.357 & 0.328 & 513.311 & 0.176 \\
 						\bottomrule
 					\end{tabular}
