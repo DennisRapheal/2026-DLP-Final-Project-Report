@@ -16,6 +16,7 @@
 *.synctex.gz
 *.toc
 *.vrb
+*.bbl-SAVE-ERROR
 
 # Beamer / hyperref / bibliography intermediates
 *.brf
