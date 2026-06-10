@@ -119,6 +119,7 @@
 		\begin{column}{\colwidth}
 			
 			\begin{exabox}{Task Selection}
+				\color{brown!35!black}
 				
 				We first reproduced OpenPI-Comet fixed-seed rollouts and used the local
 				$q_{final}$ statistics to select representative tasks for setup validation.
@@ -276,42 +277,7 @@
 			% 	by the flow-based base policy.
 				
 			% \end{thm}
-			
-			\begin{block}{Discussion}
-				
-				The result is negative but informative: although our implementation follows
-				the A2C2 setup with a frozen OpenPI-Comet and online residual correction,
-				it exposes a clear offline-online gap. 
-				
-				\medskip
 
-				A2C2 reduces action-level validation error, but degrades closed-loop task
-				performance, suggesting that residual imitation accuracy alone is not
-				sufficient for long-horizon robot control.
-				
-				\medskip
-				\begin{itemize}
-					\setlength{\itemsep}{0.6em}
-					\item \textbf{Offline-online mismatch:} training states come from expert
-					demonstrations, but online rollouts visit policy-induced states with missed
-					grasps, contact errors, and shifted object poses.
-
-					\item \textbf{Task-specialization mismatch:} OpenPI-Comet is trained as a
-					multi-task policy, so its action chunks reflect a broad task-agnostic control
-					prior. In contrast, the correction head is trained to fit expert-minus-base
-					residuals from a selected task, which can force the current action toward a
-					narrow task-specific distribution and disturb the base policy's general
-					multi-task behavior.
-
-					\item \textbf{Multimodal policy collapse:} the flow-matching action expert can
-					sample diverse plausible action chunks under the same observation. A
-					deterministic residual head trained with pointwise MSE may over-correct each
-					sampled base action toward a single demonstrated expert action, reducing the
-					multimodal behavior of the original flow policy.
-				\end{itemize}
-				
-				
-			\end{block}
 
 			\begin{exampleblock}{Online Diagnostics}
 				We report five online diagnostics to understand whether each A2C2 ablation
@@ -349,7 +315,44 @@
 					\caption{Online diagnostics for the four Stage-1 loss ablations.}
 					\label{tab:a2c2_online_diagnostics}
 				\end{table}
-			\end{exampleblock}	
+			\end{exampleblock}
+
+
+			\begin{block}{Discussion}
+				
+				The result is negative but informative: although our implementation follows
+				the A2C2 setup with a frozen OpenPI-Comet and online residual correction,
+				it exposes a clear offline-online gap. 
+				
+				\medskip
+
+				A2C2 reduces action-level validation error, but degrades closed-loop task
+				performance, suggesting that residual imitation accuracy alone is not
+				sufficient for long-horizon robot control.
+				
+				\medskip
+				\begin{itemize}
+					\setlength{\itemsep}{0.6em}
+					\item \textbf{Offline-online mismatch:} training states come from expert
+					demonstrations, but online rollouts visit policy-induced states with missed
+					grasps, contact errors, and shifted object poses.
+
+					\item \textbf{Task-specialization mismatch:} OpenPI-Comet is trained as a
+					multi-task policy, so its action chunks reflect a broad task-agnostic control
+					prior. In contrast, the correction head is trained to fit expert-minus-base
+					residuals from a selected task, which can force the current action toward a
+					narrow task-specific distribution and disturb the base policy's general
+					multi-task behavior.
+
+					\item \textbf{Multimodal policy collapse:} the flow-matching action expert can
+					sample diverse plausible action chunks under the same observation. A
+					deterministic residual head trained with pointwise MSE may over-correct each
+					sampled base action toward a single demonstrated expert action, reducing the
+					multimodal behavior of the original flow policy.
+				\end{itemize}
+				
+			\end{block}
+
 			
 			\begin{block}{Conclusion and Next Steps}
 				A2C2 does not improve Task 18 under the current configuration, reducing mean
