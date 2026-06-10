@@ -220,35 +220,30 @@
 			\end{block}
 			
 			\begin{exampleblock}{Results}{}
-				
-				Fixed-seed OpenPI-Comet baseline rollouts over ten instances show that Task
-				18 has partial but limited progress, making it a meaningful correction target.
-				
+
+				We evaluate Task 1 (Picking Up Trash) with fixed-seed online rollouts over
+				ten instances.  The ablation compares the frozen OpenPI-Comet baseline
+				against A2C2 residual-correction variants trained for 200k steps:
+				(i) raw MSE, (ii) normalized MSE, (iii) normalized Huber (iv) the full setting with
+				normalization, Huber loss, and gripper weighting
+		
 				\begin{table}
-					\centering
-					\begin{tabular}{l r r c}
-						\toprule
-						\textbf{ID} & \textbf{Task} & \textbf{Mean $q_{final}$} & \textbf{SD} \\
-						\midrule
-						1 & Picking Up Trash & 0.8333 & 0.2236 \\
-						7 & Picking Up Toys & 0.1833 & 0.2291 \\
-						18 & Tidying Bedroom & 0.1333 & 0.2211 \\
-						21 & Children's Toys & 0.4667 & 0.2332 \\
-						27 & Sorting Items & 0.1250 & 0.1768 \\
-						29 & Clean Up Desk & 0.0909 & 0.0707 \\
-						\bottomrule
-					\end{tabular}
-					\caption{Local fixed-seed baseline results over ten instances per assigned task.}
+						\centering
+						\begin{tabular}{l l r r c}
+								\toprule
+								\textbf{Policy} & \textbf{Ablation} & \textbf{Mean $q_{final}$} & \textbf{SD} & \textbf{Nonzero IDs} \\
+								\midrule
+								Comet & Frozen baseline & 0.8333 & 0.2236 & \\
+								Comet + A2C2 & MSE &  &  &  \\
+								Comet + A2C2 & Norm-MSE &  &  &  \\
+								Comet + A2C2 & Norm-Huber &  &  &  \\
+								Comet + A2C2 & All (Norm + Huber + GripW) & 0.1000 & 0.2134 & 2/10 \\
+								\bottomrule
+						\end{tabular}
+						\caption{Task 1 fixed-seed online evaluation over ten instances.}
 				\end{table}
-				
-				For Task 18 online comparison, the corrected policy performs worse than the
-				frozen baseline:
-				$$
-				\text{mean } q_{final}: \quad 0.1333 \rightarrow 0.0000.
-				$$
-				The baseline achieves nonzero progress on 3/10 IDs; A2C2 achieves 0/10.
-				
-			\end{exampleblock}
+		
+		  \end{exampleblock}
 
 			\begin{thm}{Potential Risk: Random Chunk Supervision Can Break Mode Consistency}{}
 				
