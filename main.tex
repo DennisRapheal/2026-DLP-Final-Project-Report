@@ -30,13 +30,13 @@
 \setlength{\colwidth}{0.45\paperwidth}
 
 \newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
-\newcommand{\blankfigure}[2]{
+\newcommand{\blankfigure}[3]{
 	\begin{figure}
 		\centering
 		\begin{tikzpicture}
 			\draw[gray, line width=1.2pt] (0,0) rectangle (#1,#2);
 		\end{tikzpicture}
-		\caption{A2C2 correction-head flow}
+		\caption{#3}
 	\end{figure}
 }
 
@@ -97,7 +97,7 @@
 		Chunk Correction (A2C2) head that predicts a 23-dimensional residual for the
 		selected base action at execution time.
 		
-		\blankfigure{20}{3.4}
+		\blankfigure{20}{3.4}{To be edited.}
 		
 		The target task is Task 18, \textit{Tidying Bedroom}. It is selected because
 		the OpenPI-Comet validation ACC prior shows non-saturated baseline competence:
@@ -188,7 +188,11 @@
 					ResNet-18 visual encoders, six-layer Transformer encoder, and residual MLP.
 				\end{itemize}
 				
-				\blankfigure{13}{3}
+				\begin{figure}
+					\centering
+					\includegraphics[height=8cm]{image/a2c2_architecture.png}
+					\caption{A2C2 correction-head architecture and residual action composition.}
+				\end{figure}
 				
 			\end{block}
 			
@@ -294,7 +298,7 @@
 					policy that was already partially competent.
 				\end{itemize}
 				
-				\blankfigure{13}{3}
+				\blankfigure{13}{3}{To be edited.}
 				
 			\end{block}
 			
