@@ -75,7 +75,7 @@
 
 \title{Residual Action Chunk Correction for OpenPI-Comet on BEHAVIOR-1K}
 
-\author{LIN, JIN-CHENG \and LIN, TING-WEI \and CHU, YI-TING}
+\author{LIN, JIN-CHENG \and LIN, TING-WEI \and CHU, I-TING}
 
 \institute[shortinst]{Deep Learning Final Project}
 
@@ -274,22 +274,37 @@
 			
 			\begin{block}{Discussion}
 				
-				The result is negative but informative. The implementation matches the A2C2
-				formulation: it keeps OpenPI-Comet frozen, trains expert-minus-base
-				residuals, uses latest execution-frame RGB/proprioception/language, and
-				deploys the head inside an online receding-horizon control loop.
+				The result is negative but informative: although our implementation follows
+				the A2C2 setup with a frozen OpenPI-Comet and online residual correction,
+				it exposes a clear offline-online gap. 
 				
+				\medskip
+				
+				A2C2 reduces action-level validation error, but degrades closed-loop task
+				performance, suggesting that residual imitation accuracy alone is not
+				sufficient for long-horizon robot control.
+				
+				\medskip
 				\begin{itemize}
+					\setlength{\itemsep}{0.6em}
 					\item \textbf{Offline-online mismatch:} training states come from expert
 					demonstrations, but online rollouts visit policy-induced states with missed
 					grasps, contact errors, and shifted object poses.
-					\item \textbf{Action-scale imbalance:} raw MSE may be dominated by large arm
-					coordinates while small gripper/contact dimensions remain task-critical.
-					\item \textbf{Overcorrection:} an unconservative residual can perturb a base
-					policy that was already partially competent.
+
+					\item \textbf{Task-specialization mismatch:} OpenPI-Comet is trained as a
+					multi-task policy, so its action chunks reflect a broad task-agnostic control
+					prior. In contrast, the correction head is trained to fit expert-minus-base
+					residuals from a selected task, which can force the current action toward a
+					narrow task-specific distribution and disturb the base policy's general
+					multi-task behavior.
+
+					\item \textbf{Multimodal policy collapse:} the flow-matching action expert can
+					sample diverse plausible action chunks under the same observation. A
+					deterministic residual head trained with pointwise MSE may over-correct each
+					sampled base action toward a single demonstrated expert action, reducing the
+					multimodal behavior of the original flow policy.
 				\end{itemize}
 				
-				\blankfigure{13}{3}{To be edited.}
 				
 			\end{block}
 			
