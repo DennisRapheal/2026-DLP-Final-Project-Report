@@ -113,7 +113,7 @@
 		
 		\begin{column}{\colwidth}
 			
-			\begin{exampleblock}{Task Selection}
+			\begin{exabox}{Task Selection}
 				
 				We first reproduced OpenPI-Comet fixed-seed rollouts and used the local
 				$q_{final}$ statistics to select representative tasks for setup validation.
@@ -135,7 +135,7 @@
 					\caption{Local OpenPI-Comet fixed-seed rollout statistics for selected tasks.}
 				\end{table}
 				
-			\end{exampleblock}
+			\end{exabox}
 	
 			
 			\begin{block}{Correction Head Inputs}
@@ -220,20 +220,20 @@
 				We evaluate Task 1 (Picking Up Trash) with fixed-seed online rollouts over
 				ten instances.  The ablation compares the frozen OpenPI-Comet baseline
 				against A2C2 residual-correction variants trained for 200k steps:
-				(i) raw MSE, (ii) normalized MSE, (iii) normalized Huber (iv) the full setting with
+				(a) raw MSE, (b) normalized MSE, (c) normalized Huber, (d) the full setting with
 				normalization, Huber loss, and gripper weighting. All the validation corrected mse are smaller than base action mse. 
 		
 				\begin{table}
 						\centering
-						\begin{tabular}{l l r r c}
+						\begin{tabular}{c l l c c c}
 								\toprule
-								\textbf{Policy} & \textbf{Ablation} & \textbf{Mean $q_{final}$} & \textbf{SD} & \textbf{Nonzero IDs} \\
+								\textbf{ID} & \textbf{Policy} & \textbf{Ablation} & \textbf{Mean $q_{final}$} & \textbf{SD} & \textbf{Nonzero IDs} \\
 								\midrule
-								Comet & Frozen baseline & 0.8333 & 0.2236 & \\
-								Comet + A2C2 & MSE &  &  &  \\
-								Comet + A2C2 & Norm-MSE &  &  &  \\
-								Comet + A2C2 & Norm-Huber &  &  &  \\
-								Comet + A2C2 & All (Norm + Huber + GripW) & 0.1000 & 0.2134 & 2/10 \\
+								-- & Comet & Frozen baseline & 0.8333 & 0.2236 & \\
+								(a) & Comet + A2C2 & MSE &  &  &  \\
+								(b) & Comet + A2C2 & Norm-MSE &  &  &  \\
+								(c) & Comet + A2C2 & Norm-Huber &  &  &  \\
+								(d) & Comet + A2C2 & Norm+Huber+GripW & 0.1000 & 0.2134 & 2/10 \\
 								\bottomrule
 						\end{tabular}
 						\caption{Task 1 fixed-seed online evaluation over ten instances.}
@@ -324,7 +324,7 @@
 				\end{itemize}
 			\end{block}
 		\end{column}
-		
+
 		\separatorcolumn
 	\end{columns}
 \end{frame}
