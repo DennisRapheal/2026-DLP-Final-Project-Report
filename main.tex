@@ -92,15 +92,20 @@
 	\begin{column}{2\colwidth+\sepwidth}
 	\begin{block}{Project Overview}
 		
-		We study whether an Asynchronous Action Chunk Correction (A2C2) module can
-		improve a frozen OpenPI-Comet VLA policy on BEHAVIOR-1K without retraining
-		the base model.
+		OpenPI-Comet predicts long-horizon 32-step action chunks for BEHAVIOR-1K,
+		but a fixed chunk can become locally stale as the robot interacts with the
+		scene. We study whether an Asynchronous Action Chunk Correction (A2C2)
+		module can improve a frozen OpenPI-Comet VLA policy without retraining the
+		base model.
 		
-		OpenPI-Comet predicts 32-step action chunks. At execution offset $k$, A2C2
-		uses the latest observation to predict a 23-D residual:
+		At execution offset $k$, A2C2 uses the latest observation to predict a
+		23-D residual on top of the selected base action:
 		$$
 		a^{exec}_{t+k} = a^b_{t,k} + \lambda \Delta a_{t,k}.
 		$$
+		We first reproduce fixed-seed OpenPI-Comet rollouts, then evaluate whether
+		raw and normalized residual objectives can reduce action-level error without
+		hurting closed-loop task performance.
 
 		
 	\end{block}
@@ -307,6 +312,44 @@
 				
 				
 			\end{block}
+
+			\begin{exampleblock}{Online Diagnostics}
+				We report five online diagnostics to understand whether each A2C2 ablation
+				behaves as a safe local corrector during rollout.
+				\textbf{Res. L2} measures the average residual correction magnitude; lower
+				values indicate that A2C2 stays closer to the frozen base policy.
+				\textbf{OOR} measures the percentage of corrected actions outside the valid
+				action range.
+				\textbf{Grip Acc@5} measures the average left/right gripper event matching
+				accuracy within five steps, while \textbf{Grip Delay} measures the average
+				command-to-realization delay.
+				\textbf{Jerk} measures action smoothness.
+				If an ablation improves validation MSE but increases Res. L2, OOR, or Jerk,
+				the offline improvement may not translate to better rollout performance.
+
+				\vspace{-0.3em}
+				\begin{table}[t]
+					\centering
+					\small
+					\begin{tabular}{c c c c c c}
+						\toprule
+						\textbf{ID} &
+						\textbf{Res. L2} $\downarrow$ &
+						\textbf{OOR \%} $\downarrow$ &
+						\textbf{Grip Acc@5} $\uparrow$ &
+						\textbf{Grip Delay} $\downarrow$ &
+						\textbf{Jerk} $\downarrow$ \\
+						\midrule
+						(a) &  &  &  &  &  \\
+						(b) &  &  &  &  &  \\
+						(c) &  &  &  &  &  \\
+						(d) &  &  &  &  &  \\
+						\bottomrule
+					\end{tabular}
+					\caption{Online diagnostics for the four Stage-1 loss ablations.}
+					\label{tab:a2c2_online_diagnostics}
+				\end{table}
+			\end{exampleblock}	
 			
 			\begin{block}{Conclusion and Next Steps}
 				A2C2 does not improve Task 18 under the current configuration, reducing mean
