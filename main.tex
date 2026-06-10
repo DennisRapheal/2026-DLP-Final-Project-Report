@@ -241,36 +241,36 @@
 		
 		  \end{exampleblock}
 
-			\begin{thm}{Potential Risk: Random Chunk Supervision Can Break Mode Consistency}{}
+			% \begin{thm}{Potential Risk: Random Chunk Supervision Can Break Mode Consistency}{}
 				
-				The base flow policy samples a temporally coherent action chunk:
-				$$
-				A^b_t \sim \pi_b(A_t \mid o_t, \ell).
-				$$
-				However, A2C2 is trained with randomly sampled chunk offsets. For an offset
-				$k$, the residual target is defined locally as
-				$$
-				\Delta a^{target}_{t,k}
-				=
-				a^{expert}_{t+k} - a^b_{t,k}.
-				$$
+			% 	The base flow policy samples a temporally coherent action chunk:
+			% 	$$
+			% 	A^b_t \sim \pi_b(A_t \mid o_t, \ell).
+			% 	$$
+			% 	However, A2C2 is trained with randomly sampled chunk offsets. For an offset
+			% 	$k$, the residual target is defined locally as
+			% 	$$
+			% 	\Delta a^{target}_{t,k}
+			% 	=
+			% 	a^{expert}_{t+k} - a^b_{t,k}.
+			% 	$$
 
-				This provides only local one-step supervision. If multiple valid chunks exist
-				under similar observations, the sampled expert action may belong to a different
-				mode from the base action chunk. Then the residual head is trained to partially
-				pull a coherent base chunk toward a locally different expert mode:
-				$$
-				a^b_{t,k} + \Delta a_\phi
-				\approx
-				a^{expert}_{t+k}.
-				$$
+			% 	This provides only local one-step supervision. If multiple valid chunks exist
+			% 	under similar observations, the sampled expert action may belong to a different
+			% 	mode from the base action chunk. Then the residual head is trained to partially
+			% 	pull a coherent base chunk toward a locally different expert mode:
+			% 	$$
+			% 	a^b_{t,k} + \Delta a_\phi
+			% 	\approx
+			% 	a^{expert}_{t+k}.
+			% 	$$
 
-				As a result, the correction may not collapse an entire trajectory, but it can
-				break chunk-level mode consistency. The corrected action sequence may mix
-				parts of different modes, reducing the temporal coherence originally produced
-				by the flow-based base policy.
+			% 	As a result, the correction may not collapse an entire trajectory, but it can
+			% 	break chunk-level mode consistency. The corrected action sequence may mix
+			% 	parts of different modes, reducing the temporal coherence originally produced
+			% 	by the flow-based base policy.
 				
-			\end{thm}
+			% \end{thm}
 			
 			\begin{block}{Discussion}
 				
@@ -279,7 +279,7 @@
 				it exposes a clear offline-online gap. 
 				
 				\medskip
-				
+
 				A2C2 reduces action-level validation error, but degrades closed-loop task
 				performance, suggesting that residual imitation accuracy alone is not
 				sufficient for long-horizon robot control.
