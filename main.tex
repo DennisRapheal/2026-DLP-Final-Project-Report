@@ -136,7 +136,7 @@
 			
 			\begin{alertblock}{Task Selection}
 				
-				The assigned tasks are 1, 7, 18, 21, 27, and 29. Task 18 is chosen as the
+				We filter tasks based on their validation ACC prior. Task 18 is chosen as the
 				main target because it balances base-policy competence and remaining
 				improvement potential.
 				
@@ -144,11 +144,11 @@
 					\centering
 					\begin{tabular}{l l r}
 						\toprule
-						\textbf{ID} & \textbf{Task} & \textbf{ACC Prior} \\
+						\textbf{ID} & \textbf{Task} & \textbf{ACC Prior} & \textbf{Avg Frames} \\
 						\midrule
-						1 & Picking Up Trash & 100\% \\
-						7 & Picking Up Toys & 0\% \\
-						18 & Tidying Bedroom & 20\% \\
+						1 & Picking Up Trash & 100\% & 5268 \\
+						7 & Picking Up Toys & 0\% & 18891 \\
+						18 & Tidying Bedroom & 20\% & 11037 \\
 						\bottomrule
 					\end{tabular}
 					\caption{OpenPI-Comet validation ACC prior used only for task selection.}
