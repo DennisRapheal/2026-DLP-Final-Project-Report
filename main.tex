@@ -238,7 +238,7 @@
 								\toprule
 								\textbf{ID} & \textbf{Policy} & \textbf{Ablation} & \textbf{Mean $q_{final}$} & \textbf{SD} & \textbf{Nonzero IDs} \\
 								\midrule
-								-- & Comet & Frozen baseline & 0.8333 & 0.2236 & 10/10 \\
+								-- & Comet & Frozen baseline & 0.6667 & 0.3944 & 8/10 \\
 								(a) & Comet + A2C2 & MSE & 0.0000 & 0.0000 & 0/10 \\
 								(b) & Comet + A2C2 & Norm-MSE & 0.2333 & 0.2134 & 6/10 \\
 								(c) & Comet + A2C2 & Norm-Huber & 0.0000 & 0.0000 & 0/10 \\
@@ -283,18 +283,13 @@
 
 
 			\begin{exampleblock}{Online Diagnostics}
-				We report five online diagnostics to understand whether each A2C2 ablation
-				behaves as a safe local corrector during rollout.
-				\textbf{Res. L2} measures the average residual correction magnitude; lower
-				values indicate that A2C2 stays closer to the frozen base policy.
-				\textbf{OOR} measures the percentage of corrected actions outside the valid
-				action range.
-				\textbf{Grip Acc@5} measures the average left/right gripper event matching
-				accuracy within five steps, while \textbf{Grip Delay} measures the average
-				command-to-realization delay.
-				\textbf{Jerk} measures action smoothness.
-				If an ablation improves validation MSE but increases Res. L2, OOR, or Jerk,
-				the offline improvement may not translate to better rollout performance.
+				Range normalization helps but is not sufficient: Norm-MSE is the best
+				A2C2 variant with $q_{final}=0.2333$, but it still largely underperforms
+				the frozen baseline.
+				The main online failure signal is temporal instability: all A2C2 variants
+				increase jerk by roughly $4\times$--$7\times$ compared with the baseline,
+				suggesting that per-step residual correction disrupts the smooth temporal
+				coherence of the base action chunks.
 
 				\vspace{-0.3em}
 				\begin{table}[t]
@@ -309,13 +304,21 @@
 						\textbf{Grip Delay} $\downarrow$ &
 						\textbf{Jerk} $\downarrow$ \\
 						\midrule
+						-- & 0.000 & 4.735 & 0.713 & 510.454 & 0.040 \\
 						(a) & 0.383 & 9.189 & 0.000 & 178.875 & 0.269 \\
 						(b) & 0.335 & 2.329 & 0.703 & 482.033 & 0.160 \\
 						(c) & 0.115 & 1.695 & 0.268 & 615.282 & 0.174 \\
 						(d) & 0.113 & 2.357 & 0.328 & 513.311 & 0.176 \\
 						\bottomrule
 					\end{tabular}
-					\caption{Online diagnostics for the four ablations.}
+					\caption{
+						Online diagnostics for the baseline and four ablations.
+						Res. L2: mean residual correction magnitude;
+						OOR: out-of-range corrected-action ratio;
+						Grip Acc@5: average left/right gripper event matching within five steps;
+						Grip Delay: average command-to-realization delay;
+						Jerk: mean action jerk norm.
+					}
 					\label{tab:a2c2_online_diagnostics}
 				\end{table}
 			\end{exampleblock}
