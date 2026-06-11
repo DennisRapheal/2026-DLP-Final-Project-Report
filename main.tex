@@ -359,18 +359,24 @@
 
 			
 			\begin{block}{Conclusion and Next Steps}
-				A2C2 does not improve Task 1 under the current configuration, reducing mean
-				$q_{final}$ from * to *. The next iteration should focus on making
-				the residual module more conservative and better matched to online states.
+				A2C2 gives a negative but specific result: lower validation MSE does not
+				predict online success. We propose three follow-up experiments that directly
+				test the discussion hypotheses.
 				
 				\begin{itemize}
-					\item Normalize or reweight the loss by action dimension.
-					\item Ablate correction scales such as 0.25, 0.5, and 1.0.
-					\item Add residual norm clipping and an uncertainty gate that can keep the
-					base action unchanged.
-					\item Analyze performance by chunk offset to separate stale-chunk errors from
-					missing high-level capability.
-					\item Add online data, rollout-state relabeling, or hard-negative states.
+					\item Replay failed rollout states and
+					sweep residual scaling, group-wise clipping, and action-range projection to
+					test whether a gated Norm-MSE corrector can reduce Res. L2, OOR, gripper
+					delay, and jerk while improving $q_{final}$.
+			
+					\item Train a broad mixed-task head
+					on all available correction data, then compare it with target-task
+					specialist heads and task-conditioned residual MLPs to separate
+					over-specialization from cross-task negative transfer.
+			
+					\item Add chunk-level smoothness/jerk
+					regularization and test multi-sample base-chunk selection to preserve the
+					frozen flow policy's temporally coherent action modes.
 				\end{itemize}
 			\end{block}
 
