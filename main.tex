@@ -2,7 +2,7 @@
 %% Possible paper sizes: a0, a0b, a1, a2, a3, a4.
 %% Possible orientations: portrait, landscape
 %% Font sizes can be changed using the scale option.
-\usepackage[size=a0,orientation=portrait,scale=1.1]{beamerposter}
+\usepackage[size=a1,orientation=portrait,scale=1.06]{beamerposter}
 
 \usetheme{gemini}
 \usecolortheme{seagull}
@@ -45,10 +45,10 @@
 % ====================
 
 \logoleft{
-	\hspace{5cm}\includegraphics[height=10 cm]{logos/nycu.png}
+	\hspace{0.04\paperwidth}\includegraphics[height=0.08\paperheight]{logos/nycu.png}
 }
 \logoright{
-	\includegraphics[height=10 cm]{logos/nycu.png}\hspace{5cm}
+	\includegraphics[height=0.08\paperheight]{logos/nycu.png}\hspace{0.04\paperwidth}
 }
 
 % ====================
@@ -165,7 +165,7 @@
 				
 				\begin{figure}
 					\centering
-					\includegraphics[height=28cm]{image/a2c2_architecture.png}
+					\includegraphics[width=0.95\linewidth]{image/a2c2_architecture.png}
 					\caption{A2C2 correction-head architecture and residual action composition.}
 				\end{figure}
 				
@@ -239,9 +239,9 @@
 								\textbf{ID} & \textbf{Policy} & \textbf{Ablation} & \textbf{Mean $q_{final}$} & \textbf{SD} & \textbf{Nonzero IDs} \\
 								\midrule
 								-- & Comet & Frozen baseline & 0.8333 & 0.2236 & 10/10 \\
-								(a) & Comet + A2C2 & MSE & 0.0000 & x & 0/10 \\
+								(a) & Comet + A2C2 & MSE & 0.0000 & 0.0000 & 0/10 \\
 								(b) & Comet + A2C2 & Norm-MSE & 0.2333 & 0.2134 & 6/10 \\
-								(c) & Comet + A2C2 & Norm-Huber & 0.0000 & x & 0/10 \\
+								(c) & Comet + A2C2 & Norm-Huber & 0.0000 & 0.0000 & 0/10 \\
 								(d) & Comet + A2C2 & Norm+Huber+GripW & 0.1000 & 0.2134 & 2/10 \\
 								\bottomrule
 						\end{tabular}
