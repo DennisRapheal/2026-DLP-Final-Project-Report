@@ -101,7 +101,7 @@
 		At execution offset $k$, A2C2 uses the latest observation to predict a
 		23-D residual on top of the selected base action:
 		$$
-		a^{exec}_{t+k} = a^b_{t,k} + \lambda \Delta a_{t,k}.
+		a^{exec}_{t+k} = a_{t,k} + \lambda \Delta a_{t,k}.
 		$$
 		We first reproduce fixed-seed OpenPI-Comet rollouts, then evaluate whether
 		raw and normalized residual objectives can reduce action-level error without
@@ -123,8 +123,9 @@
 				
 				We first reproduced OpenPI-Comet fixed-seed rollouts and used the local
 				$q_{final}$ statistics to select representative tasks for setup validation.
-				Task 18 is kept as the main correction target because it shows partial but
-				non-saturated baseline progress.
+				Task 1 is kept as the main correction target because its base-policy
+				evaluation is comparatively stable, making it a clearer benchmark for
+				assessing the A2C2 module.
 				
 				{
 				\setbeamercolor{caption}{fg=brown!35!black}
@@ -178,7 +179,9 @@
 				a heterogeneous, bounded robot action vector as a homogeneous residual
 				regression problem:
 				$$
-				L = \|\Delta a_{pred} - (a_{expert} - a^b_{t,k})\|_2^2.
+				L = \|\hat{\Delta a}_{t,k} - \Delta a^*_{t,k}\|_2^2, 
+				\quad
+				\Delta a^*_{t,k} = a^*_{t+k} - a_{t,k}.
 				$$
 				
 				\begin{itemize}
@@ -194,16 +197,12 @@
 
 			\begin{defbox}{Range-Normalized Residual Loss}
 
-				We keep the residual target unchanged:
-				$$
-				\Delta a^*_{t,k} = a^*_{t+k} - a^b_{t,k}.
-				$$
 				For each action dimension $j$, we estimate a robust scale from the training
 				split and normalize residual errors:
 				$$
 				s_j = \max\left(Q_{0.99}(a_j)-Q_{0.01}(a_j), \epsilon\right),
 				\quad
-				e_j = \frac{\hat{\Delta a}_j - \Delta a^*_j}{s_j}.
+				e_j = \frac{\hat{\Delta a}_{t,k,j} - \Delta a^*_{t,k,j}}{s_j}.
 				$$
 				Then we aggregate errors by action group:
 				$$
